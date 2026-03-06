@@ -15,11 +15,10 @@ namespace BudgetingApp.Controllers
             return new string[] { "value1", "value2" };
         }
 
-        // GET api/<UsersController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("{id:int}")]
+        public ActionResult<string> Get(int id)
         {
-            return "value";
+            return Ok("value");
         }
 
         // POST api/<UsersController>
