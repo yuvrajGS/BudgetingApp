@@ -1,5 +1,4 @@
 using BudgetingApp.Data;
-using BudgetingApp.Repositories;
 using BudgetingApp.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +10,13 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddHttpClient<IMLService, MLService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:8000");
+});
 // Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -1,21 +1,22 @@
-﻿using BudgetingApp.DTOs;
+﻿using BudgetingApp.Data;
+using BudgetingApp.DTOs;
 using BudgetingApp.Models;
-using BudgetingApp.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace BudgetingApp.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly AppDbContext _context;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(AppDbContext context)
         {
-            _userRepository = userRepository;
+            _context = context;
         }
 
         public async Task<UserDTO?> GetUserByIdAsync(Guid id)
         {
-            var user = await _userRepository.GetUserByIdAsync(id);
+            var user = await _context.Users.FindAsync(id);
             if (user == null) return null;
 
             return new UserDTO
@@ -29,7 +30,7 @@ namespace BudgetingApp.Services
 
         public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
         {
-            var users = await _userRepository.GetAllUsersAsync();
+            var users = await _context.Users.ToListAsync();
             return users.Select(u => new UserDTO
             {
                 Id = u.Id,
@@ -42,7 +43,7 @@ namespace BudgetingApp.Services
         public async Task<UserDTO> CreateUserAsync(CreateUserDTO createUserDto)
         {
             // optional: validate email uniqueness
-            var existingUser = await _userRepository.GetUserByEmailAsync(createUserDto.Email);
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == createUserDto.Email);
             if (existingUser != null)
             {
                 throw new Exception("User with this email already exists");
@@ -50,19 +51,21 @@ namespace BudgetingApp.Services
 
             var user = new User
             {
+                Id = Guid.NewGuid(),
                 Name = createUserDto.Name,
                 Email = createUserDto.Email,
                 CreatedAt = DateTime.UtcNow
             };
 
-            var createdUser = await _userRepository.CreateUserAsync(user);
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
             return new UserDTO
             {
-                Id = createdUser.Id,
-                Name = createdUser.Name,
-                Email = createdUser.Email,
-                CreatedAt = createdUser.CreatedAt
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                CreatedAt = user.CreatedAt
             };
         }
     }
