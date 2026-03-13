@@ -2,6 +2,6 @@
 {
     public interface ICategoryService
     {
-        public int GetCategoryIdByName(string name);
+        int GetCategoryIdByName(string name);
     }
 }

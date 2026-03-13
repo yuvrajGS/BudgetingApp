@@ -1,6 +1,6 @@
 ﻿namespace BudgetingApp.Models
 {
-    public class MerchantAliases
+    public class MerchantAlias
     {
         public int Id { get; set; }
         public required string RawName { get; set; }
