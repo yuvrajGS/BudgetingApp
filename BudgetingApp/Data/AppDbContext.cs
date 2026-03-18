@@ -8,6 +8,10 @@ namespace BudgetingApp.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<MerchantAlias>()
+                .HasIndex(m => m.RawName)
+                .IsUnique();
+
             modelBuilder.Entity<Category>()
                 .Property(c => c.CreatedAt)
                 .HasDefaultValueSql("NOW()");
