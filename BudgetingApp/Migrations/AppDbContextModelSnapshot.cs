@@ -55,7 +55,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Supermarkets and food stores",
                             Keywords = "grocery,supermarket,food,produce,organic,market",
                             Name = "Groceries"
@@ -63,7 +63,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Restaurants, cafes, and takeout",
                             Keywords = "restaurant,cafe,coffee,takeout,delivery,fast food,pizza,sushi,bistro",
                             Name = "Dining"
@@ -71,7 +71,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Gas, transit, rideshare, parking",
                             Keywords = "gas,fuel,uber,lyft,taxi,transit,subway,bus,parking,toll,train",
                             Name = "Transport"
@@ -79,7 +79,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Retail and online shopping",
                             Keywords = "amazon,shopping,retail,store,clothing,electronics,mall",
                             Name = "Shopping"
@@ -87,7 +87,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Movies, streaming, games, events",
                             Keywords = "netflix,spotify,cinema,theatre,game,concert,ticket,disney,steam",
                             Name = "Entertainment"
@@ -95,7 +95,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 6,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Pharmacy, gym, medical",
                             Keywords = "pharmacy,drugstore,doctor,hospital,clinic,gym,fitness,dental,vision",
                             Name = "Health"
@@ -103,7 +103,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 7,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Hydro, internet, phone, water",
                             Keywords = "hydro,electric,internet,phone,water,gas bill,utility,rogers,bell,telus",
                             Name = "Utilities"
@@ -111,7 +111,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 8,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Flights, hotels, car rental",
                             Keywords = "hotel,flight,airbnb,airline,car rental,vacation,resort,booking,expedia",
                             Name = "Travel"
@@ -119,7 +119,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 9,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Banks, insurance, investments",
                             Keywords = "bank,insurance,investment,loan,credit,brokerage,finance,transfer",
                             Name = "Finance"
@@ -127,7 +127,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 10,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Tuition, books, courses",
                             Keywords = "university,college,tuition,course,udemy,books,school,learning",
                             Name = "Education"
@@ -135,7 +135,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 11,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Recurring software & memberships",
                             Keywords = "subscription,membership,saas,annual fee,monthly fee,adobe,microsoft",
                             Name = "Subscriptions"
@@ -143,7 +143,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 12,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Rent, mortgage, repairs, furniture",
                             Keywords = "rent,mortgage,furniture,repair,hardware,ikea,home depot,lease",
                             Name = "Home"
@@ -151,7 +151,7 @@ namespace BudgetingApp.Migrations
                         new
                         {
                             Id = 13,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Haircuts, cosmetics, spa",
                             Keywords = "salon,barber,spa,cosmetics,beauty,haircut,skincare,nails",
                             Name = "Personal Care"
@@ -164,6 +164,27 @@ namespace BudgetingApp.Migrations
                             Keywords = "",
                             Name = "Uncategorized"
                         });
+                });
+
+            modelBuilder.Entity("BudgetingApp.Models.MerchantAlias", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RawName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MerchantAlias");
                 });
 
             modelBuilder.Entity("BudgetingApp.Models.Transaction", b =>

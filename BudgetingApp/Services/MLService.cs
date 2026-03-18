@@ -45,15 +45,20 @@
 
             return result.Categories;
         }
+
+        public async Task InvalidateCategoryCacheAsync()
+        { 
+            var response = await _client.PostAsync("/api/v1/cache/invalidate", null);
+        }
     }
 
     public class PredictionResponse
     {
-        public string Category { get; set; }
+        public required string Category { get; set; }
     }
 
     public class BatchPredictionResponse
     {
-        public List<string> Categories { get; set; }
+        public required List<string> Categories { get; set; }
     }
 }
