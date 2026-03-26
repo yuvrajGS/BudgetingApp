@@ -1,8 +1,11 @@
-﻿namespace BudgetingApp.Services
+﻿using BudgetingApp.DTOs;
+
+namespace BudgetingApp.Services
 {
     public interface ICategoryService
     {
+        Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync();
         int GetCategoryIdByName(string name);
-        Task<int> CreateCategoryAsync(string name, string description, string keywords);
+        Task<int> CreateCategoryAsync(CreateCategoryDTO dto);
     }
 }

@@ -16,7 +16,7 @@
                 merchant
             };
 
-            var response = await _client.PostAsJsonAsync("/predict", request);
+            var response = await _client.PostAsJsonAsync("/api/v1/predict", request);
 
             response.EnsureSuccessStatusCode();
 
@@ -35,7 +35,7 @@
             {
                 merchants
             };
-            var response = await _client.PostAsJsonAsync("/predict/batch", request);
+            var response = await _client.PostAsJsonAsync("/api/v1/predict/batch", request);
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadFromJsonAsync<BatchPredictionResponse>();
             if (result == null)

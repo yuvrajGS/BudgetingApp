@@ -1,4 +1,5 @@
 ﻿using BudgetingApp.Data;
+using BudgetingApp.DTOs;
 using BudgetingApp.Models;
 using BudgetingApp.Services;
 using Microsoft.EntityFrameworkCore;
@@ -29,10 +30,19 @@ public class CategoryService : ICategoryService
     private static string Normalize(string name)
         => name.Trim().ToLowerInvariant();
 
-    // ✅ Safe lookup (preferred for most cases)
-    public bool TryGetCategoryId(string name, out int categoryId)
+    public async Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync()
     {
-        return _categoryMap.TryGetValue(Normalize(name), out categoryId);
+        var categories = await _context.Categories
+            .AsNoTracking()
+            .ToListAsync();
+        return categories.Select(c => new CategoryDTO
+        {
+            Id = c.Id,
+            Name = c.Name,
+            Description = c.Description,
+            Keywords = c.Keywords,
+            CreatedAt = c.CreatedAt
+        });
     }
 
     // ✅ Strict lookup (throws if not found)
@@ -47,9 +57,9 @@ public class CategoryService : ICategoryService
     }
 
     // ✅ Explicit creation (ONLY place where categories are added)
-    public async Task<int> CreateCategoryAsync(string name, string description, string keywords)
+    public async Task<int> CreateCategoryAsync(CreateCategoryDTO dto)
     {
-        var normalized = Normalize(name);
+        var normalized = Normalize(dto.Name);
 
         // Check cache first (avoid duplicates)
         if (_categoryMap.TryGetValue(normalized, out var existingId))
@@ -57,7 +67,7 @@ public class CategoryService : ICategoryService
 
         // Double-check DB (handles race conditions across instances)
         var existing = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Name.Trim().ToLowerInvariant() == normalized);
+            .FirstOrDefaultAsync(c => c.Name.Trim().ToLower() == normalized);
 
         if (existing != null)
         {
@@ -68,17 +78,16 @@ public class CategoryService : ICategoryService
         // Create new category
         var newCategory = new Category
         {
-            // Adjust if you're using int PK instead of Guid
-            Name = name,
-            Description = description,
-            Keywords = keywords,
+            Name = dto.Name,
+            Description = dto.Description,
+            Keywords = dto.Keywords,
         };
 
         _context.Categories.Add(newCategory);
         await _context.SaveChangesAsync();
 
         // Update cache
-        _categoryMap[name] = newCategory.Id;
+        _categoryMap[dto.Name] = newCategory.Id;
 
         // 🔥 Notify ML service to refresh its cache
         await _mlService.InvalidateCategoryCacheAsync();
