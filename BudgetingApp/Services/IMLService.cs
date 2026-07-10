@@ -2,9 +2,9 @@
 {
     public interface IMLService
     {
-        Task<string> PredictCategoryAsync(string merchant);
+        Task<(string category, string cleanName)> PredictCategoryAsync(string merchant);
 
-        Task<List<string>> PredictCategoryBatchAsync(List<string> merchants);
+        Task<List<(string category, string cleanName)>> PredictCategoryBatchAsync(List<string> merchants);
 
         Task InvalidateCategoryCacheAsync();
 

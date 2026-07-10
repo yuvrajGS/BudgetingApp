@@ -42,5 +42,33 @@ namespace BudgetingApp.Controllers
             var transactions = await _service.GetTransactionsByUserAsync(userId);
             return Ok(transactions);
         }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<ActionResult> DeleteTransaction(Guid id)
+        {
+            try
+            {
+                await _service.DeleteTransactionAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<TransactionDTO>> UpdateTransaction(Guid id, UpdateTransactionDTO dto)
+        {
+            try
+            {
+                var updatedTransaction = await _service.UpdateTransactionAsync(id, dto);
+                return Ok(updatedTransaction);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
     }
 }

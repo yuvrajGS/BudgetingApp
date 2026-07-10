@@ -45,6 +45,23 @@ public class CategoryService : ICategoryService
         });
     }
 
+    public async Task<Category?> GetCategoryByIdAsync(int id)
+    {
+        var category = await _context.Categories
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id);
+        if (category == null)
+            return null;
+        return new Category
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Description = category.Description,
+            Keywords = category.Keywords,
+            CreatedAt = category.CreatedAt
+        };
+    }
+
     // ✅ Strict lookup (throws if not found)
     public int GetCategoryIdByName(string name)
     {

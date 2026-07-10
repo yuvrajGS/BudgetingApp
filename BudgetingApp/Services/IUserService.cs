@@ -7,5 +7,6 @@ namespace BudgetingApp.Services
         Task<UserDTO?> GetUserByIdAsync(Guid id);
         Task<UserDTO> CreateUserAsync(CreateUserDTO createUserDto);
         Task<IEnumerable<UserDTO>> GetAllUsersAsync();
+        Task DeleteUserAsync(Guid id);
     }
 }

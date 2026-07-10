@@ -45,6 +45,20 @@ namespace BudgetingApp.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<ActionResult> DeleteUser(Guid id)
+        {
+            try
+            {
+                await _userService.DeleteUserAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
     }
 }
 

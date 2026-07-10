@@ -13,6 +13,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IMerchantAliasService, MerchantAliasService>();
 builder.Services.AddHttpClient<IMLService, MLService>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:8000");
