@@ -15,6 +15,7 @@ import TransactionDetail from "./pages/transactions/TransactionDetail";
 import TransactionCreate from "./pages/transactions/TransactionCreate";
 import TransactionBatchCreate from "./pages/transactions/TransactionBatchCreate";
 import TransactionImport from "./pages/transactions/TransactionImport";
+import TransactionUpdate from "./pages/transactions/TransactionUpdate";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/transactions/batch" element={<TransactionBatchCreate />} />
           <Route path="/transactions/import" element={<TransactionImport />} />
           <Route path="/transactions/:id" element={<TransactionDetail />} />
+          <Route path="/transactions/update/:id" element={<TransactionUpdate />} />
         </Routes>
       </Layout>
     </BrowserRouter>

@@ -1,17 +1,25 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getTransaction } from "../../api/transactions";
+import { getTransaction, deleteTransaction } from "../../api/transactions";
 import { getUser } from "../../api/users";
 import { listCategories } from "../../api/categories";
 import PageHeader from "../../components/PageHeader";
 import { Loading, ErrorBlock, Empty } from "../../components/Status";
 import Amount from "../../components/Amount";
+import { Button } from "../../components/Form";
+import { useNavigate } from "react-router-dom";
+
+
 
 export default function TransactionDetail() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [state, setState] = useState({ loading: true, error: null, transaction: null });
   const [user, setUser] = useState(null);
   const [category, setCategory] = useState(null);
+
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   useEffect(() => {
     setState({ loading: true, error: null, transaction: null });
@@ -37,6 +45,17 @@ export default function TransactionDetail() {
       .catch((err) => setState({ loading: false, error: err.message, transaction: null }));
   }, [id]);
 
+  const handleDelete = () => {
+      deleteTransaction(id)
+        .then(() => {
+          navigate("/transactions/");
+        })
+        .catch((err) => {
+          setDeleteError(err.message);
+          setShowConfirmDelete(false);
+        });
+    }
+
   if (state.loading) return <Loading label="Loading transaction…" />;
   if (state.error) return <ErrorBlock message={state.error} />;
   if (!state.transaction) return <Empty title="Transaction not found" />;
@@ -45,7 +64,49 @@ export default function TransactionDetail() {
 
   return (
     <div className="max-w-2xl">
-      <PageHeader eyebrow="Transaction" title={transaction.merchant} />
+      <PageHeader 
+        eyebrow="Transaction" 
+        title={transaction.merchant}
+        action={
+          <div className="flex gap-2">
+            <Link to={`/transactions/update/${transaction.id}`}>
+              <Button>Update Transaction</Button>
+            </Link>
+            <Button variant="delete" onClick={() => setShowConfirmDelete(true)}>
+              Delete Transaction
+            </Button>
+          </div>
+        }
+      />
+
+      {showConfirmDelete && (
+        <div className="mb-4 p-4 bg-rust/10 border border-rust/20 rounded-sm">
+          <p className="text-sm text-rust">
+            Are you sure you want to delete this transaction? This action cannot be undone.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <Button
+              variant="delete"
+              onClick={handleDelete}
+            >
+              Yes, delete transaction
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setShowConfirmDelete(false);
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {deleteError && <ErrorBlock message={deleteError} onRetry={() => {
+        setShowConfirmDelete(true);
+        setDeleteError(null);
+      }} />}
 
       <div className="rounded-sm border border-line bg-white p-6">
         <div className="flex items-baseline justify-between rule pb-5 mb-5">

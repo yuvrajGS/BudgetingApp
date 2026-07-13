@@ -132,6 +132,7 @@ namespace BudgetingApp.Services
             {
                 await _merchantAliasService.AddMerchantAlias(dto.Merchant, category.Name);
             }
+            await _mlService.InvalidateCategoryCacheAsync();
 
             await _context.SaveChangesAsync();
             return MapToDTO(transaction);
