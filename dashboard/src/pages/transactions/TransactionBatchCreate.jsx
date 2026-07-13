@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { listUsers } from "../../api/users";
-import { listCategories } from "../../api/categories";
 import { createTransactionBatch } from "../../api/transactions";
 import PageHeader from "../../components/PageHeader";
 import { Field, TextInput, Select, Button } from "../../components/Form";
 import { ErrorBlock } from "../../components/Status";
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => {
+  const d = new Date();
+
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
+};
 
 const blankRow = (userId = "") => ({
   key: crypto.randomUUID(),
@@ -16,23 +21,20 @@ const blankRow = (userId = "") => ({
   merchant: "",
   amount: "",
   description: "",
-  categoryId: "",
 });
 
 export default function TransactionBatchCreate() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [rows, setRows] = useState([blankRow()]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    Promise.all([listUsers(), listCategories()])
-      .then(([u, c]) => {
+    listUsers()
+      .then((u) => {
         setUsers(u ?? []);
-        setCategories(c ?? []);
         setRows([blankRow(u?.[0]?.id ?? "")]);
         setLoadingOptions(false);
       })
@@ -55,11 +57,10 @@ export default function TransactionBatchCreate() {
     try {
       const payload = rows.map((r) => ({
         userId: r.userId,
-        date: new Date(r.date).toISOString(),
+        date: r.date,
         merchant: r.merchant,
         amount: Number(r.amount),
         description: r.description,
-        categoryId: r.categoryId ? Number(r.categoryId) : null,
       }));
       await createTransactionBatch(payload);
       navigate(rows[0]?.userId ? `/transactions?userId=${rows[0].userId}` : "/transactions");
@@ -103,7 +104,6 @@ export default function TransactionBatchCreate() {
                 <th className="px-3 py-3 font-medium">Merchant</th>
                 <th className="px-3 py-3 font-medium">Amount</th>
                 <th className="px-3 py-3 font-medium">Description</th>
-                <th className="px-3 py-3 font-medium">Category (optional)</th>
                 <th className="px-3 py-3" />
               </tr>
             </thead>
@@ -151,16 +151,6 @@ export default function TransactionBatchCreate() {
                       onChange={updateRow(row.key, "description")}
                       placeholder="Household items"
                     />
-                  </td>
-                  <td className="px-3 py-2 min-w-[140px]">
-                    <Select value={row.categoryId} onChange={updateRow(row.key, "categoryId")}>
-                      <option value="">Let ML categorize it</option>
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </Select>
                   </td>
                   <td className="px-3 py-2">
                     <button

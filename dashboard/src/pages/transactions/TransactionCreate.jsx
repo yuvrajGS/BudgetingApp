@@ -6,8 +6,16 @@ import { createTransaction } from "../../api/transactions";
 import PageHeader from "../../components/PageHeader";
 import { Field, TextInput, TextArea, Select, Button } from "../../components/Form";
 import { ErrorBlock } from "../../components/Status";
+import { formatDateOnly } from "../../utils/date";
 
-const today = () => new Date().toISOString().slice(0, 10);
+
+const today = () => {
+  const d = new Date();
+
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
+};
 
 export default function TransactionCreate() {
   const navigate = useNavigate();
@@ -15,7 +23,6 @@ export default function TransactionCreate() {
   const presetUserId = searchParams.get("userId") ?? "";
 
   const [users, setUsers] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [optionsError, setOptionsError] = useState(null);
 
@@ -31,10 +38,9 @@ export default function TransactionCreate() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    Promise.all([listUsers(), listCategories()])
-      .then(([u, c]) => {
+    listUsers()
+      .then((u) => {
         setUsers(u ?? []);
-        setCategories(c ?? []);
         setForm((f) => ({ ...f, userId: f.userId || u?.[0]?.id || "" }));
         setLoadingOptions(false);
       })
@@ -53,11 +59,10 @@ export default function TransactionCreate() {
     try {
       const transaction = await createTransaction({
         userId: form.userId,
-        date: new Date(form.date).toISOString(),
+        date:form.date,
         merchant: form.merchant,
         amount: Number(form.amount),
         description: form.description,
-        categoryId: form.categoryId ? Number(form.categoryId) : null,
       });
       navigate(transaction?.id ? `/transactions/${transaction.id}` : `/transactions?userId=${form.userId}`);
     } catch (err) {
@@ -133,21 +138,6 @@ export default function TransactionCreate() {
             onChange={update("description")}
             placeholder="Household items"
           />
-        </Field>
-
-        <Field
-          label="Category"
-          htmlFor="categoryId"
-          hint="Optional — leave blank and the backend's ML categorizer will assign one."
-        >
-          <Select id="categoryId" value={form.categoryId} onChange={update("categoryId")}>
-            <option value="">Let ML categorize it</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
         </Field>
 
         <div className="flex justify-end gap-3 pt-2">

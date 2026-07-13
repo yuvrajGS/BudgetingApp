@@ -1,3 +1,4 @@
+import { parseDateOnly } from "./date";
 // Groups a flat list of transactions into month or year buckets, each with
 // a total, a count, and a per-category breakdown — the shape the analysis
 // views need to answer "what am I spending on this month/year".
@@ -33,8 +34,9 @@ export function groupByMonth(transactions, categoryMap = new Map()) {
   const buckets = new Map();
 
   for (const t of transactions) {
-    const d = new Date(t.date);
-    if (Number.isNaN(d.getTime())) continue;
+    const d = parseDateOnly(t.date);
+    if (!d || Number.isNaN(d.getTime())) continue;
+
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     const list = buckets.get(key) ?? [];
     list.push(t);
@@ -57,7 +59,7 @@ export function groupByYear(transactions, categoryMap = new Map()) {
   const buckets = new Map();
 
   for (const t of transactions) {
-    const d = new Date(t.date);
+    const d = parseDateOnly(t.date);
     if (Number.isNaN(d.getTime())) continue;
     const key = String(d.getFullYear());
     const list = buckets.get(key) ?? [];

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Amount from "./Amount";
+import { formatDateOnly } from "../utils/date";
+
 
 // Renders a list of grouped buckets (from groupByMonth/groupByYear): a
 // header with the period total, a category breakdown so you can see what
@@ -87,7 +89,7 @@ export default function AnalysisGroups({ groups }) {
                         .map((t) => (
                           <tr key={t.id} className="rule last:border-b-0">
                             <td className="py-2 pr-3 font-mono text-xs text-muted whitespace-nowrap">
-                              {new Date(t.date).toLocaleDateString()}
+                              {formatDateOnly(t.date)}
                             </td>
                             <td className="py-2 pr-3">
                               <Link

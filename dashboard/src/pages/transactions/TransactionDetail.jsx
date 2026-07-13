@@ -8,8 +8,7 @@ import { Loading, ErrorBlock, Empty } from "../../components/Status";
 import Amount from "../../components/Amount";
 import { Button } from "../../components/Form";
 import { useNavigate } from "react-router-dom";
-
-
+import { formatDateOnly } from "../../utils/date";
 
 export default function TransactionDetail() {
   const navigate = useNavigate();
@@ -115,11 +114,7 @@ export default function TransactionDetail() {
             <Amount value={transaction.amount} className="text-2xl" />
           </div>
           <p className="font-mono text-xs text-muted">
-            {new Date(transaction.date).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+             {formatDateOnly(transaction.date)}
           </p>
         </div>
 

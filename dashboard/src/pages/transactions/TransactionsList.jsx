@@ -9,6 +9,7 @@ import { Loading, ErrorBlock, Empty } from "../../components/Status";
 import Amount from "../../components/Amount";
 import AnalysisGroups from "../../components/AnalysisGroups";
 import { groupByMonth, groupByYear } from "../../utils/groupTransactions";
+import { formatDateOnly } from "../../utils/date";
 
 const VIEWS = [
   { key: "all", label: "All" },
@@ -55,7 +56,7 @@ export default function TransactionsList() {
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories]);
 
   const sortedList = useMemo(
-    () => [...tx.list].sort((a, b) => new Date(b.date) - new Date(a.date)),
+    () => [...tx.list].sort((a, b) => b.date.localeCompare(a.date)),
     [tx.list]
   );
   const monthGroups = useMemo(() => groupByMonth(tx.list, categoryMap), [tx.list, categoryMap]);
@@ -169,7 +170,7 @@ export default function TransactionsList() {
                   {sortedList.map((t) => (
                     <tr key={t.id} className="rule last:border-b-0 hover:bg-paper-dim/50">
                       <td className="px-4 py-3 font-mono text-xs text-muted whitespace-nowrap">
-                        {new Date(t.date).toLocaleDateString()}
+                        {formatDateOnly(t.date)}
                       </td>
                       <td className="px-4 py-3">
                         <Link to={`/transactions/${t.id}`} className="font-medium text-ink hover:underline">

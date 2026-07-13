@@ -7,8 +7,6 @@ import PageHeader from "../../components/PageHeader";
 import { Field, TextInput, TextArea, Select, Button } from "../../components/Form";
 import { ErrorBlock } from "../../components/Status";
 
-const today = () => new Date().toISOString().slice(0, 10);
-
 export default function TransactionUpdate() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -33,7 +31,7 @@ export default function TransactionUpdate() {
       .then(([t, c]) => {
         setTransaction(t ?? []);
         setCategories(c ?? []);
-        setForm((f) => ({ ...f, date: new Date(t.date).toISOString().slice(0, 10) ?? "", merchant: t?.merchant ?? "", amount: t?.amount ?? "", description: t?.description ?? "", categoryId: t?.categoryId ?? "" }));
+        setForm((f) => ({ ...f, date: t?.date ?? "", merchant: t?.merchant ?? "", amount: t?.amount ?? "", description: t?.description ?? "", categoryId: t?.categoryId ?? "" }));
         setLoadingOptions(false);
       })
       .catch((err) => {
@@ -50,7 +48,7 @@ export default function TransactionUpdate() {
     setError(null);
     try {
       const transaction = await updateTransaction(id, {
-        date: new Date(form.date).toISOString(),
+        date: form.date,
         merchant: form.merchant,
         amount: Number(form.amount),
         description: form.description,
