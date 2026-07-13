@@ -45,7 +45,7 @@ namespace BudgetingApp.Services
                 var categoriesWithCleanNames = new List<(string category, string cleanName)>();
                 for (int i = 0; i < result.Categories.Count; i++)
                 {
-                    categoriesWithCleanNames.Add((result.Categories[i], result.MerchantCleans[i]));
+                    categoriesWithCleanNames.Add((result.Categories[i], result.Details[i].MerchantClean));
                 }
                 return categoriesWithCleanNames;
             }
@@ -72,10 +72,7 @@ namespace BudgetingApp.Services
     public class BatchPredictionResponse
     {
         public required List<string> Categories { get; set; }
-        public required List<double> Confidences { get; set; }
-        [JsonPropertyName("merchant_clean")]
-        public required List<string> MerchantCleans { get; set; }
-        [JsonPropertyName("alias_source")]
-        public required List<string> AliasSources { get; set; }
+
+        public required List<PredictionResponse> Details { get; set; }
     }
 }
