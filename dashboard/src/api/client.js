@@ -50,3 +50,20 @@ export const apiPut = (path, body) =>
   request(path, { method: "PUT", body: JSON.stringify(body) });
 
 export const apiDelete = (path) => request(path, { method: "DELETE" });
+
+export async function apiPostFormData(path, formData) {
+   const response = await fetch(path, {
+    method: "POST",
+    body: formData,
+  });
+  const data = await response.json();
+
+  if (!response.ok) {
+    const message =
+      (data && (data.message || data.title)) ||
+      `Request failed with status ${response.status}`;
+    throw new ApiError(message, response.status);
+  }
+
+  return data;
+}

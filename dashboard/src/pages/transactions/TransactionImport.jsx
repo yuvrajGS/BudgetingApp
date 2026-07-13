@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { listUsers } from "../../api/users";
-import { createTransactionBatch } from "../../api/transactions";
-import { extractPdfLines } from "../../utils/pdfText";
-import { parseStatementLines } from "../../utils/statementParser";
+import { createTransactionBatch, importTransactions } from "../../api/transactions";
 import PageHeader from "../../components/PageHeader";
 import { Field, TextInput, Select, Button } from "../../components/Form";
 import { ErrorBlock, Empty } from "../../components/Status";
@@ -13,6 +11,7 @@ const blankRow = () => ({
   date: "",
   merchant: "",
   description: "",
+  category: "",
   amount: "",
 });
 
@@ -56,13 +55,8 @@ export default function TransactionImport() {
     setParseError(null);
     setRows([]);
     try {
-      const lines = await extractPdfLines(file);
-      setRawLines(lines);
-      const { rows: parsedRows, skipped } = parseStatementLines(lines, {
-        fallbackYear: new Date().getFullYear(),
-      });
-      setSkippedCount(skipped);
-      setRows(parsedRows.map((r) => ({ ...r, key: crypto.randomUUID() })));
+      const transactions = await importTransactions(file);
+      setRows(transactions.map((r) => ({ ...r, key: crypto.randomUUID() })));
     } catch (err) {
       setParseError(`Couldn't read that PDF: ${err.message}`);
     } finally {
