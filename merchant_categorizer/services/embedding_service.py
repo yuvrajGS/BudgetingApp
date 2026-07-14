@@ -9,9 +9,10 @@ from typing import Optional
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
-from rapidfuzz import process as fuzz_process, fuzz
+from rapidfuzz import fuzz, process as fuzz_process
 from sqlalchemy import select, func
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+from typing import Optional
 
 from ..database import AsyncSessionLocal, Category, MerchantAlias
 from ..config import settings
@@ -72,8 +73,10 @@ class EmbeddingService:
         # Partition into cache hits and misses.
         # Both exact and fuzzy cache hits bypass the model entirely.
         hits: dict[int, dict] = {}       # index → result (no model needed)
-        miss_indices: list[int] = []     # original indices of true cache misses
-        miss_clean: list[str] = []       # normalised names that need model classification
+        # original indices of true cache misses
+        miss_indices: list[int] = []
+        # normalised names that need model classification
+        miss_clean: list[str] = []
 
         for i, raw in enumerate(merchant_raws):
             clean = normalise(raw)
@@ -109,7 +112,8 @@ class EmbeddingService:
         miss_results: list[dict] = []
         if miss_clean:
             if self._model is None:
-                raise RuntimeError("Model not loaded — cannot classify merchants.")
+                raise RuntimeError(
+                    "Model not loaded — cannot classify merchants.")
 
             # (B_miss, D) — only the merchants we haven't seen before
             query_matrix = self._model.encode(
@@ -117,25 +121,27 @@ class EmbeddingService:
             )
 
             if self._category_matrix is None:
-                raise RuntimeError("Category matrix not loaded — cannot classify merchants.")
+                raise RuntimeError(
+                    "Category matrix not loaded — cannot classify merchants.")
 
             # (B_miss, D) @ (D, N_cats) → (B_miss, N_cats)
             # Row i = cosine similarity between miss i and every category
             scores_matrix = query_matrix @ self._category_matrix.T
 
             for j, original_idx in enumerate(miss_indices):
-                raw        = merchant_raws[original_idx]
-                clean      = miss_clean[j]
-                scores     = scores_matrix[j]
-                best_idx   = int(np.argmax(scores))
+                raw = merchant_raws[original_idx]
+                clean = miss_clean[j]
+                scores = scores_matrix[j]
+                best_idx = int(np.argmax(scores))
                 best_score = float(scores[best_idx])
-                below      = best_score < settings.CONFIDENCE_THRESHOLD
-                category   = "Uncategorized" if below else self._category_names[best_idx]
+                below = best_score < settings.CONFIDENCE_THRESHOLD
+                category = "Uncategorized" if below else self._category_names[best_idx]
 
                 # Only cache confident results — don't persist "Uncategorized"
                 # since the merchant might classify correctly once more categories exist
                 if not below:
-                    asyncio.create_task(self._persist_cache_entry(clean, category))
+                    asyncio.create_task(
+                        self._persist_cache_entry(clean, category))
 
                 miss_results.append({
                     "merchant_raw":    raw,
@@ -205,12 +211,12 @@ class EmbeddingService:
             raise RuntimeError("Model not loaded — cannot classify merchant.")
 
         # Full model classification
-        query_vec  = self._model.encode([clean], normalize_embeddings=True)
-        scores     = (self._category_matrix @ query_vec.T).flatten()
-        best_idx   = int(np.argmax(scores))
+        query_vec = self._model.encode([clean], normalize_embeddings=True)
+        scores = (self._category_matrix @ query_vec.T).flatten()
+        best_idx = int(np.argmax(scores))
         best_score = float(scores[best_idx])
-        below      = best_score < settings.CONFIDENCE_THRESHOLD
-        category   = "Uncategorized" if below else self._category_names[best_idx]
+        below = best_score < settings.CONFIDENCE_THRESHOLD
+        category = "Uncategorized" if below else self._category_names[best_idx]
 
         if not below:
             asyncio.create_task(self._persist_cache_entry(clean, category))
@@ -226,25 +232,30 @@ class EmbeddingService:
 
     def _fuzzy_cache_lookup(self, clean: str) -> Optional[tuple[str, str]]:
         """
-        Check if clean is close enough to an existing cache key to be the same merchant.
-        Returns (existing_key, category) if a match is found above threshold, else None.
+        Check if `clean` is close enough to an existing cache key to be
+        considered the same merchant.
 
-        This prevents near-duplicate entries like:
-          "Amazon"  → "Shopping"
-          "Amazons" → "Shopping"   ← would be redundant without this check
+        Returns:
+            (existing_key, category) if a match is found above the configured
+            threshold, otherwise None.
         """
         cache_keys = list(self._cache.keys())
         if not cache_keys:
             return None
+
         result = fuzz_process.extractOne(
-            clean, cache_keys, scorer=fuzz.token_sort_ratio
+            query=clean,
+            choices=cache_keys,
+            scorer=fuzz.WRatio,
+            score_cutoff=settings.FUZZY_MATCH_THRESHOLD,
         )
+
         if result is None:
             return None
+
         matched_key, score, _ = result
-        if score >= settings.FUZZY_MATCH_THRESHOLD:
-            return matched_key, self._cache[matched_key]
-        return None
+
+        return matched_key, self._cache[matched_key]
 
     # ── Cache persistence ─────────────────────────────────────────────────────
 
@@ -273,7 +284,8 @@ class EmbeddingService:
             logger.debug(f"Cached: '{clean}' -> '{category}'")
         except Exception as e:
             # Non-fatal — in-memory cache still works for this process lifetime
-            logger.warning(f"Failed to persist cache entry '{clean}' -> '{category}': {e}")
+            logger.warning(
+                f"Failed to persist cache entry '{clean}' -> '{category}': {e}")
 
     # ── Cache management ──────────────────────────────────────────────────────
 
@@ -296,7 +308,8 @@ class EmbeddingService:
             latest: Optional[datetime] = result.scalar()
 
         if latest is None:
-            logger.warning("Categories table is empty — skipping cache refresh.")
+            logger.warning(
+                "Categories table is empty — skipping cache refresh.")
             return
 
         should_refresh = False
@@ -318,7 +331,7 @@ class EmbeddingService:
         where category is a known category.
         """
         async with AsyncSessionLocal() as session:
-            cats    = (await session.execute(select(Category))).scalars().all()
+            cats = (await session.execute(select(Category))).scalars().all()
             aliases = (await session.execute(select(MerchantAlias))).scalars().all()
 
         # Enrich each category into a descriptive string for better embedding quality.
@@ -344,9 +357,10 @@ class EmbeddingService:
             raise RuntimeError("Model not loaded — cannot refresh cache.")
 
         # Encode → (N_cats, D), unit-length for cosine similarity via dot product
-        matrix = self._model.encode(texts, normalize_embeddings=True, batch_size=64)
+        matrix = self._model.encode(
+            texts, normalize_embeddings=True, batch_size=64)
         self._category_matrix = np.array(matrix)
-        self._category_names  = names
+        self._category_names = names
 
         # Load merchant result cache
         category_set = set(names)
