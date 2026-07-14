@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+sentence-transformers
+huggingface_hub
+sqlalchemy
+python-multipart
+pydantic
