@@ -5,4 +5,5 @@ huggingface_hub
 sqlalchemy
 python-multipart
 pydantic
+pydantic-settings
 rapidfuzz

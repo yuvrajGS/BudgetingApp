@@ -35,6 +35,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
 
   backend:
     build:
@@ -74,3 +76,4 @@ services:
 
 volumes:
   postgres_data:
+  huggingface-cache:
