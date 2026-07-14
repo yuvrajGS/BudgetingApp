@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getUser, deleteUser } from "../../api/users";
 import { listTransactionsForUser } from "../../api/transactions";
@@ -7,6 +7,8 @@ import { Button } from "../../components/Form";
 import { Loading, ErrorBlock, Empty } from "../../components/Status";
 import Amount from "../../components/Amount";
 import { useNavigate } from "react-router-dom";
+import { formatDateOnly } from "../../utils/date";
+
 
 export default function UserDetail() {
   const navigate = useNavigate();
@@ -43,6 +45,11 @@ export default function UserDetail() {
         setShowConfirmDelete(false);
       });
   }
+
+  const sortedList = useMemo(
+      () => [...txState.transactions].sort((a, b) => b.date.localeCompare(a.date)),
+      [txState.transactions]
+    );
 
   if (state.loading) return <Loading label="Loading user…" />;
   if (state.error) return <ErrorBlock message={state.error} />;
@@ -144,10 +151,10 @@ export default function UserDetail() {
               </tr>
             </thead>
             <tbody>
-              {txState.transactions.map((tx) => (
+              {sortedList.map((tx) => (
                 <tr key={tx.id} className="rule last:border-b-0 hover:bg-paper-dim/50">
                   <td className="px-4 py-3 font-mono text-xs text-muted">
-                    {new Date(tx.date).toLocaleDateString()}
+                    {formatDateOnly(tx.date)}
                   </td>
                   <td className="px-4 py-3">
                     <Link to={`/transactions/${tx.id}`} className="font-medium text-ink hover:underline">
