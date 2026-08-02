@@ -11,15 +11,18 @@ export class ApiError extends Error {
 }
 
 async function request(path, options = {}) {
+  const headers = { ...options.headers };
+
+  // Only set JSON content type if not sending FormData
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const response = await fetch(path, {
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
     ...options,
+    headers,
   });
 
-  // 204 No Content or empty bodies: nothing to parse.
   const raw = await response.text();
   const data = raw ? safeJsonParse(raw) : null;
 
@@ -44,26 +47,12 @@ function safeJsonParse(raw) {
 export const apiGet = (path) => request(path, { method: "GET" });
 
 export const apiPost = (path, body) =>
-  request(path, { method: "POST", body: JSON.stringify(body) });
+  request(path, {
+    method: "POST",
+    body: body instanceof FormData ? body : JSON.stringify(body),
+  });
 
 export const apiPut = (path, body) =>
   request(path, { method: "PUT", body: JSON.stringify(body) });
 
 export const apiDelete = (path) => request(path, { method: "DELETE" });
-
-export async function apiPostFormData(path, formData) {
-   const response = await fetch(path, {
-    method: "POST",
-    body: formData,
-  });
-  const data = await response.json();
-
-  if (!response.ok) {
-    const message =
-      (data && (data.message || data.title)) ||
-      `Request failed with status ${response.status}`;
-    throw new ApiError(message, response.status);
-  }
-
-  return data;
-}

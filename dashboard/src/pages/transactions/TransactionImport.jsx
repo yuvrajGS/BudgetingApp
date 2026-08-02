@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { listUsers } from "../../api/users";
-import { createTransactionBatch, importTransactions } from "../../api/transactions";
+import { createTransactionBatch } from "../../api/transactions";
+import { uploadDocument } from "../../api/documents";
 import PageHeader from "../../components/PageHeader";
 import { Field, TextInput, Select, Button } from "../../components/Form";
 import { ErrorBlock, Empty } from "../../components/Status";
@@ -15,6 +16,15 @@ const blankRow = () => ({
   amount: "",
 });
 
+const toRow = (t) => ({
+  key: crypto.randomUUID(),
+  date: t.date ?? "",
+  merchant: t.merchant ?? "",
+  description: t.description ?? "",
+  category: "",
+  amount: t.amount != null ? String(t.amount) : "",
+});
+
 export default function TransactionImport() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -26,9 +36,6 @@ export default function TransactionImport() {
   const [fileName, setFileName] = useState(null);
   const [parsing, setParsing] = useState(false);
   const [parseError, setParseError] = useState(null);
-  const [skippedCount, setSkippedCount] = useState(0);
-  const [rawLines, setRawLines] = useState([]);
-  const [showRaw, setShowRaw] = useState(false);
 
   const [rows, setRows] = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -50,15 +57,24 @@ export default function TransactionImport() {
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     setFileName(file.name);
-    setParsing(true);
     setParseError(null);
     setRows([]);
+
+    if (!userId) {
+      setParseError("Choose which user this statement belongs to before uploading.");
+      e.target.value = "";
+      return;
+    }
+
+    setParsing(true);
     try {
-      const transactions = await importTransactions(file);
-      setRows(transactions.map((r) => ({ ...r, key: crypto.randomUUID() })));
+      const parsed = await uploadDocument(file, userId);
+      const list = Array.isArray(parsed) ? parsed : [];
+      setRows(list.map(toRow));
     } catch (err) {
-      setParseError(`Couldn't read that PDF: ${err.message}`);
+      setParseError(err.message);
     } finally {
       setParsing(false);
     }
@@ -85,7 +101,7 @@ export default function TransactionImport() {
     try {
       const payload = rows.map((r) => ({
         userId,
-        date: new Date(r.date).toISOString(),
+        date: r.date,
         merchant: r.merchant || r.description || "Unknown merchant",
         amount: Number(r.amount),
         description: r.description,
@@ -104,10 +120,7 @@ export default function TransactionImport() {
       <PageHeader eyebrow="Activity" title="Import bank statement" />
 
       <p className="mb-6 max-w-2xl text-sm text-ink-soft">
-        Upload a PDF statement and this'll pull out the date, merchant, and amount for each line
-        it can confidently read. Statement layouts vary a lot between banks, so double-check the
-        table below before submitting — categories aren't set here since the backend's ML
-        categorizer assigns those automatically once transactions are created.
+        Upload a PDF statement from your bank or credit card provider, and we'll try to read the transactions automatically. You can review and edit them before saving.
       </p>
 
       <div className="rounded-sm border border-line bg-white p-6 mb-6">
@@ -134,6 +147,7 @@ export default function TransactionImport() {
               type="file"
               accept="application/pdf"
               onChange={handleFile}
+              disabled={parsing}
               className="block w-full text-sm text-ink-soft file:mr-3 file:rounded-sm file:border-0 file:bg-ink file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:opacity-90"
             />
           </Field>
@@ -153,29 +167,10 @@ export default function TransactionImport() {
         {parsing && <p className="mt-4 text-sm text-muted">Reading {fileName}…</p>}
         {parseError && <div className="mt-4"><ErrorBlock message={parseError} /></div>}
 
-        {!parsing && fileName && !parseError && (
+        {!parsing && fileName && !parseError && rows.length > 0 && (
           <p className="mt-4 text-sm text-muted">
-            Found {rows.length} likely transaction{rows.length === 1 ? "" : "s"} in {fileName}
-            {skippedCount > 0 && (
-              <>
-                {" "}
-                — {skippedCount} line{skippedCount === 1 ? "" : "s"} couldn't be read automatically.
-              </>
-            )}{" "}
-            <button
-              type="button"
-              onClick={() => setShowRaw((s) => !s)}
-              className="underline decoration-line underline-offset-2 hover:decoration-ink"
-            >
-              {showRaw ? "Hide" : "Show"} extracted text
-            </button>
+            Found {rows.length} transaction{rows.length === 1 ? "" : "s"} in {fileName}. Review below before saving.
           </p>
-        )}
-
-        {showRaw && (
-          <pre className="mt-3 max-h-48 overflow-y-auto rounded-sm bg-paper-dim p-3 font-mono text-xs text-ink-soft whitespace-pre-wrap">
-            {rawLines.join("\n") || "No text found in this PDF."}
-          </pre>
         )}
       </div>
 

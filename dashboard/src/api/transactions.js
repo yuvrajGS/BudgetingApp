@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiDelete, apiPut, apiPostFormData } from "./client";
+import { apiGet, apiPost, apiDelete, apiPut } from "./client";
 
 // GET /api/transaction/{id}
 export const getTransaction = (id) =>
@@ -27,9 +27,3 @@ export const updateTransaction = (id, body) =>
 // DELETE /api/transaction/{id}
 export const deleteTransaction = (id) =>
   apiDelete(`/api/transaction/${encodeURIComponent(id)}`);
-
-export const importTransactions = (file) => {
-  const formData = new FormData();
-  formData.append("file", file);
-  return apiPostFormData("/api/transaction/import", formData);
-};

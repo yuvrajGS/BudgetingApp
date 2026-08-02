@@ -1,10 +1,10 @@
-const formatter = new Intl.NumberFormat("en-US", {
+const formatter = new Intl.NumberFormat("en-CA", {
   style: "currency",
-  currency: "USD",
+  currency: "CAD",
 });
 
-// Positive amounts read as ledger-green (money in / neutral spend),
-// negative amounts read as rust (refunds or corrections). Since most
+// Negative amounts read as ledger-green (money in / neutral spend),
+// positive amounts read as rust (refunds or corrections). Since most
 // transaction amounts represent spend, sign is what carries meaning here.
 export default function Amount({ value, className = "" }) {
   const numeric = Number(value ?? 0);
