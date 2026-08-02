@@ -80,7 +80,7 @@ npm run dev  # Runs on http://localhost:5173
 3. **ML automatically predicts category**
 4. Save
 
-### Import Bank Statements (in development)
+### Import Bank Statements
 
 ![Importing a transaction](./resources/Import.png)
 
@@ -177,6 +177,10 @@ PostgreSQL credentials: `budgetingapp` / `budgeting_password`
 - `POST /api/transaction/batch` – Bulk create
 - `PUT /api/transaction/{id}` – Update transaction
 - `DELETE /api/transaction/{id}` – Delete transaction
+
+**Documents**
+
+- `POST /api/document/upload` – Extract transactions from a PDF
 
 **Categories**:
 
