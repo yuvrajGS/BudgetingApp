@@ -224,10 +224,10 @@ namespace BudgetingApp.Services
         }
 
         private static readonly Regex WithdrawalHeaderPattern =
-            new(@"with ?drawal|withdrawn|debit(s)?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            new(@"with ?drawal|funds out|withdrawn|debit(s)?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private static readonly Regex DepositHeaderPattern =
-            new(@"deposit(s)?|credit(s)?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            new(@"deposit(s)?|funds in|credit(s)?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private static readonly Regex BalanceHeaderPattern =
             new(@"balance", RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -258,18 +258,18 @@ namespace BudgetingApp.Services
         {
             foreach (var line in allLines)
             {
-                var withdrawalWord = line.Words.FirstOrDefault(w => WithdrawalHeaderPattern.IsMatch(w.Text));
-                var depositWord = line.Words.FirstOrDefault(w => DepositHeaderPattern.IsMatch(w.Text));
+                var withdrawalWords = FindHeaderPhrase(line.Words, WithdrawalHeaderPattern);
+                var depositWords = FindHeaderPhrase(line.Words, DepositHeaderPattern);
 
-                if (withdrawalWord != null && depositWord != null)
+                if (withdrawalWords != null && depositWords != null)
                 {
-                    var balanceWord = line.Words.FirstOrDefault(w => BalanceHeaderPattern.IsMatch(w.Text));
+                    var balanceWords = FindHeaderPhrase(line.Words, BalanceHeaderPattern);
 
                     return new ColumnLayout
                     {
-                        WithdrawalX = CenterX(withdrawalWord),
-                        DepositX = CenterX(depositWord),
-                        BalanceX = balanceWord != null ? CenterX(balanceWord) : (double?)null
+                        WithdrawalX = CenterX(withdrawalWords),
+                        DepositX = CenterX(depositWords),
+                        BalanceX = balanceWords != null ? CenterX(balanceWords) : (double?)null
                     };
                 }
             }
@@ -277,7 +277,38 @@ namespace BudgetingApp.Services
             return null;
         }
 
+        /// <summary>
+        /// PDF text extraction tokenizes each visual "word" (whitespace-separated
+        /// run) as its own <see cref="Word"/>, so a two-word header label like
+        /// "Funds Out" or "Withdrawal Amount" arrives as two separate tokens and
+        /// never matches a header pattern when tokens are checked individually.
+        /// This checks runs of 1-3 consecutive words joined together against the
+        /// pattern so multi-word headers are still detected, and returns the
+        /// matching words so their combined bounding box can be used for the
+        /// column's X position.
+        /// </summary>
+        private static List<Word>? FindHeaderPhrase(List<Word> words, Regex pattern)
+        {
+            for (int windowSize = 1; windowSize <= 3 && windowSize <= words.Count; windowSize++)
+            {
+                for (int i = 0; i + windowSize <= words.Count; i++)
+                {
+                    var window = words.Skip(i).Take(windowSize).ToList();
+                    var joined = string.Join(" ", window.Select(w => w.Text));
+                    if (pattern.IsMatch(joined))
+                    {
+                        return window;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         private static double CenterX(Word w) => (w.BoundingBox.Left + w.BoundingBox.Right) / 2.0;
+
+        private static double CenterX(List<Word> words) =>
+            (words.Min(w => w.BoundingBox.Left) + words.Max(w => w.BoundingBox.Right)) / 2.0;
 
         /// <summary>
         /// Best-effort guess at the statement's year, used to fill in dates printed
