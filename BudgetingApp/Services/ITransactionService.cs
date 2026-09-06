@@ -10,5 +10,6 @@ namespace BudgetingApp.Services
         Task<IEnumerable<TransactionDTO>> GetTransactionsByUserAsync(Guid userId);
         Task DeleteTransactionAsync(Guid id);
         Task<TransactionDTO> UpdateTransactionAsync(Guid id, UpdateTransactionDTO dto);
+        Task<TransactionDTO> PatchTransactionAsync(Guid id, PatchTransactionDTO dto);
     }
 }

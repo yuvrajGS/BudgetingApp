@@ -7,6 +7,7 @@ import PageHeader from "../../components/PageHeader";
 import { Select, Button } from "../../components/Form";
 import { Loading, ErrorBlock, Empty } from "../../components/Status";
 import Amount from "../../components/Amount";
+import { UpdateTransactionCategoryBox } from "../../components/UpdateTransactionCategory";
 import AnalysisGroups from "../../components/AnalysisGroups";
 import { groupByMonth, groupByYear } from "../../utils/groupTransactions";
 import { formatDateOnly } from "../../utils/date";
@@ -178,7 +179,7 @@ export default function TransactionsList() {
                         </Link>
                       </td>
                       <td className="px-4 py-3 text-ink-soft">
-                        {categoryMap.get(t.categoryId) ?? "Uncategorized"}
+                        <UpdateTransactionCategoryBox categoryMap={categoryMap} categoryId={t.categoryId} transactionId={t.id} />
                       </td>
                       <td className="px-4 py-3 text-ink-soft">{t.description}</td>
                       <td className="px-4 py-3 text-right">

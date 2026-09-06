@@ -47,7 +47,7 @@ export default function TransactionDetail() {
   const handleDelete = () => {
       deleteTransaction(id)
         .then(() => {
-          navigate("/transactions/");
+          navigate(`/transactions/?userId=${user.id}`);
         })
         .catch((err) => {
           setDeleteError(err.message);

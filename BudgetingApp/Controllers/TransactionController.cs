@@ -70,5 +70,20 @@ namespace BudgetingApp.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
+
+        [HttpPatch("{id:guid}")]
+        public async Task<ActionResult<TransactionDTO>> PatchTransaction(Guid id, PatchTransactionDTO dto)
+        {
+            try
+            {
+                var patchedTransaction = await _service.PatchTransactionAsync(id, dto);
+                return Ok(patchedTransaction);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+
+        }
     }
 }

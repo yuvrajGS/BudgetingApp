@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiDelete, apiPut } from "./client";
+import { apiGet, apiPost, apiDelete, apiPut, apiPatch } from "./client";
 
 // GET /api/transaction/{id}
 export const getTransaction = (id) =>
@@ -27,3 +27,6 @@ export const updateTransaction = (id, body) =>
 // DELETE /api/transaction/{id}
 export const deleteTransaction = (id) =>
   apiDelete(`/api/transaction/${encodeURIComponent(id)}`);
+// PATCH /api/transaction/{id}
+export const patchTransaction = (id, body) =>
+  apiPatch(`/api/transaction/${encodeURIComponent(id)}`, body);

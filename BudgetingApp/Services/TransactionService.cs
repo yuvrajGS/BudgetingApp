@@ -138,6 +138,68 @@ namespace BudgetingApp.Services
             return MapToDTO(transaction);
         }
 
+        public async Task<TransactionDTO> PatchTransactionAsync(Guid id, PatchTransactionDTO dto)
+        {
+            var transaction = await _context.Transactions.FindAsync(id);
+            if (transaction == null)
+            {
+                throw new KeyNotFoundException("Transaction not found");
+            }
+
+            var originalMerchant = transaction.Merchant;
+            var originalCategoryId = transaction.CategoryId;
+
+            if (dto.Date != null)
+            {
+                transaction.Date = (DateOnly)dto.Date;
+            }
+            if (dto.Merchant != null)
+            {
+                transaction.Merchant = dto.Merchant;
+            }
+            
+            if(dto.Amount != null)
+            {
+                transaction.Amount = (decimal)dto.Amount;
+            }   
+            if (dto.Description != null)
+            {
+                transaction.Description = dto.Description;
+            }
+            if (dto.CategoryId != null)
+            {
+                var newCategory = await _context.Categories.FindAsync(dto.CategoryId);
+                if (newCategory == null)
+                {
+                    throw new KeyNotFoundException("Category not found");
+                }
+
+                transaction.CategoryId = (int)dto.CategoryId;
+            }
+            var merchantExists = await _merchantAliasService.MerchantAliasExists(transaction.Merchant);
+
+            if (originalCategoryId != transaction.CategoryId || originalMerchant != transaction.Merchant)
+            {
+                var category = await _context.Categories.FindAsync(transaction.CategoryId);
+                if (category == null)
+                {
+                    throw new KeyNotFoundException("Category not found");
+                }
+
+                if (merchantExists)
+                {
+                    await _merchantAliasService.ChangeMerchantAliasCategory(transaction.Merchant, category.Name);
+                }
+                else
+                {
+                    await _merchantAliasService.AddMerchantAlias(transaction.Merchant, category.Name);
+                }
+                await _mlService.InvalidateCategoryCacheAsync();
+            }
+            await _context.SaveChangesAsync();
+            return MapToDTO(transaction);
+        }
+
         private TransactionDTO MapToDTO(Transaction t) =>
             new TransactionDTO
             {
